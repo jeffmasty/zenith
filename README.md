@@ -3,6 +3,7 @@
 A Java client that communicates with OpenAI through Spring.io's library. (https://spring.io/projects/spring-ai)  
 
 **Note:** The key to your OpenAI API needs to be exported into the runtime environment as: spring.ai.openai.api-key 
+
 Create an account and generate an API key here: https://platform.openai.com/api-keys
 
 Text chat, image generation and document embeddings (RAG) are wrapped in a Swing GUI managed by Spring Boot. Settings such as model type, temperature, audio speed and image size are available.  Vocal input through a microphone is transcribed by the AI, responses may be read back in various AI voices. 
