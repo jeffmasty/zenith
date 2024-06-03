@@ -6,16 +6,18 @@ import java.util.Vector;
 
 import javax.swing.JTextArea;
 
+import net.judah.zenith.wav.WavPlayer;
+
 public class HistoryArea extends JTextArea {
 
 	private Vector<String> history = new Vector<>();
     private int caret;
-	
+
     public HistoryArea(String text) {
     	this();
-    	setText(text);
+    	append(text);
     }
-    
+
 	public HistoryArea() {
 		setLineWrap(true);
     	setWrapStyleWord(true);
@@ -30,24 +32,38 @@ public class HistoryArea extends JTextArea {
                      e.consume();
                  }
                  else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                	 setText("");
+                	 if (WavPlayer.isPlaying())
+                		 WavPlayer.stop();
+                	 else
+                		 setText("");
                      e.consume();
                  }
              }
          });
 	}
-	
+
+	public void disable(String prompt) {
+		setText(prompt);
+		setEnabled(false);
+	}
+
+	public void clear() {
+		setText("");
+		setEnabled(true);
+		grabFocus();
+	}
+
 	/**Puts the text in the history bank and returns it
 	 * @returns getText() */
 	public String acquire() {
 		String input = getText();
-		if (input.isBlank()) 
+		if (input.isBlank())
 			return input;
 		history.add(input);
 		caret = 0;
 		return input;
 	}
-	
+
     public String history(boolean up) {
     	caret += up ? -1 : 1;
     	if (caret < 0)

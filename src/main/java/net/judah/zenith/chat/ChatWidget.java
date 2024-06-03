@@ -14,24 +14,26 @@ import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionChunk;
 
 import lombok.Getter;
 import net.judah.zenith.model.Contact;
+import net.judah.zenith.settings.Folder;
+import net.judah.zenith.settings.Props;
 import net.judah.zenith.swing.Widget;
 
 public class ChatWidget extends Widget {
-	
+
 	@Getter private final Contact chat;
 	private final AiText answer = new AiText();
 	private long end;
-	
+
 	@SuppressWarnings("unchecked")
 	public ChatWidget(Contact transaction, TextScroll parent, Runnable onEndStream) {
 		super(parent, transaction.query(), onEndStream);
 		this.chat = transaction;
 		add(answer, BorderLayout.CENTER);
-		
+
 		chat.flux().subscribe(
 			chunk -> processChunk(chunk),
-            error -> System.err.println("Error: " + error),
-            ()-> endStream()); 
+            error -> { onEndStream.run(); System.err.println(error); },
+            ()-> endStream());
 
 	}
 
@@ -47,12 +49,12 @@ public class ChatWidget extends Widget {
 			append(content);
 
 	}
-	
-	private void endStream() { 
+
+	private void endStream() {
 		end = System.currentTimeMillis();
 		onEndStream.run();
 		System.out.println();
-	}		
+	}
 
 	public void append(String chunk) {
 		answer.append(chunk);
@@ -60,31 +62,40 @@ public class ChatWidget extends Widget {
 	}
 
 	@Override
-	protected void save() {
-		File file = new File(chat.start() + ".txt");
+	protected void open() {
+		File saved = save();
+		if (saved == null)
+			return;
+		try {
+			Desktop.getDesktop().open(saved);
+		} catch (IOException e) { e.printStackTrace(); }
+	}
+
+	@Override
+	protected File save() {
+		File file = new File(Props.getFolder(Folder.TEXTS), chat.start() + ".txt");
 		try (PrintWriter printWriter = new PrintWriter(new FileWriter(file.getAbsolutePath()))) {
             printWriter.println(getAnswer());
-			Desktop.getDesktop().open(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            return file;
+        } catch (IOException e) { e.printStackTrace();}
+		return null;
 	}
-	
+
 	public String getAnswer() {
 		return answer.getText();
 	}
-	
+
 	@Override
 	public void copy() {
 		answer.selectAll();
 		answer.copy();
 	}
-	
+
 	@Override
 	protected void info() {
 		JOptionPane.showMessageDialog(null, chat.info(), "Chat", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
+
 	public long millis() {
 		return (end - chat.start());
 	}
@@ -92,6 +103,5 @@ public class ChatWidget extends Widget {
 	public String seconds() {
 		return String.format("%2.03f", millis() * 0.001f);
 	}
-	
 
 }

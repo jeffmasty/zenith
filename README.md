@@ -1,28 +1,43 @@
 # Zenith Intelligence Tracker
 
-A demonstration of Spring.io's OpenAi support for Java. (https://spring.io/projects/spring-ai)
+A Java client that communicates with OpenAI through Spring.io's library. (https://spring.io/projects/spring-ai)  
 
 **Note:** The key to your OpenAI API needs to be exported into the runtime environment as: spring.ai.openai.api-key 
 Create an account and generate an API key here: https://platform.openai.com/api-keys
 
-Text chat, image generation and document embedding (RAG) is wrapped in a Swing GUI managed by Spring Boot. Vocal input through a microphone is transcribed by the AI, responses may be read back in various AI voices and settings such as model type, temperature, audio speed and image size are available.
+Text chat, image generation and document embeddings (RAG) are wrapped in a Swing GUI managed by Spring Boot. Settings such as model type, temperature, audio speed and image size are available.  Vocal input through a microphone is transcribed by the AI, responses may be read back in various AI voices. 
 
 ## Build 
-Built with Java 21, Maven and Lombok (https://projectlombok.org/)
-This project was built against the development branch of the Spring AI API (1.0.0-SNAPSHOT), which changes frequently.
+Built with Java 21, Maven and Lombok (https://projectlombok.org/).
+This project was built against the development branch of the Spring AI API (1.0.0-SNAPSHOT) which changes frequently.
+
+mvn clean install -DskipTests
 
 ### Screenshot
 ![JudahZone logo](/screenshot.png)
 
 TODO:
-
+- dall-e-3 style setting
+- upload images into context
+- default.properties
+- delete vector docs via chunk Ids (bug)
+- vector similarities info
+- import pdfs/ChunkMaker 
+- logging, exception handling
 - tokens info
 - buffer voice request and response
-- voice response volume and replay
 - microphone accelerator keys
-- rag session info and CRUD
-- fine-tune vectorDB settings
-- dall-e-3 style setting
+- ChatCompletionRequest.name for multi-user history
 - REST app
-- linux shell AI assistant
+- Assistant: AI linux shell (aish)
+
+Recent updates:
+- settings and auto-save
+- send chat history
+- vectorDB model and dimension settings
+- Rag Session CRUD DocID -> FilesModel (w/ bug)
+- voice response logarithmic volume
+- audio player feedback and replay
+
+Icons from iconscout.com and iconfinder.com
 

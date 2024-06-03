@@ -1,10 +1,11 @@
 package net.judah.zenith.embed;
 
-public record EmbedRequest (String sysPrompt, String query, String session, String model, long start) {
+import org.springframework.ai.vectorstore.SearchRequest;
 
-	public EmbedRequest(String sysPrompt, String query, String session, String model) {
-		this(sysPrompt, query, session, model, System.currentTimeMillis());
+public record EmbedRequest (String sysPrompt, String query, SearchRequest searchRequest, long start) {
+
+	public EmbedRequest(String sysPrompt, String query, SearchRequest sr) {
+		this(sysPrompt, query, sr, System.currentTimeMillis());
 	}
-	
-	
+
 }

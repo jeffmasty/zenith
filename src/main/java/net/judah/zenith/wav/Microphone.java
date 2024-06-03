@@ -15,29 +15,31 @@ import org.springframework.core.io.FileUrlResource;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.judah.zenith.Zenith;
+import net.judah.zenith.settings.Folder;
+import net.judah.zenith.settings.Props;
 
 /**https://www.codejava.net/coding/capture-and-record-sound-into-wav-file-with-java-sound-api
- * 
+ *
  * A sample program is to demonstrate how to record sound in Java
  * author: www.codejava.net */
 public class Microphone implements Runnable {
-	public static final File AUDIO_QUERY = new File(Zenith.DATA_DIR, "Query.wav");
+
+	private final File AUDIO_QUERY = new File(Props.getFolder(Folder.AUDIO), "Query.wav");
 
 	public static final float SAMPLE_RATE = 16000;
     /** format of audio file */
     public static final Type TYPE = Type.WAVE;
     /** max recording duration, in milliseconds */
     public static final long MAX_RECORD_TIME = 60000;  // 1 Minute
- 
+
 	@Autowired private OpenAiAudioTranscriptionModel transcriber;
-	
+
     /** path of the wav file */
     @Getter @Setter private File wavFile;
     /** the line from which audio data is captured */
     private TargetDataLine line;
     @Getter @Setter private AudioFormat format;
- 
+
     /** Defines the audio format */
     public static AudioFormat defaultAudioFormat() {
         int sampleSizeInBits = 8;
@@ -47,7 +49,7 @@ public class Microphone implements Runnable {
         return new AudioFormat(
         		SAMPLE_RATE, sampleSizeInBits, channels, signed, bigEndian);
     }
-    
+
 	public boolean toggle(MicCheck listener) {
 		if (line == null) {
 			startRecording();
@@ -64,7 +66,7 @@ public class Microphone implements Runnable {
 	public void run() {
         try {
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
- 
+
             // checks if system supports the data line
             if (!AudioSystem.isLineSupported(info)) {
                 System.out.println("Line not supported");
@@ -73,13 +75,13 @@ public class Microphone implements Runnable {
             line = (TargetDataLine) AudioSystem.getLine(info);
             line.open(format);
             line.start(); //System.out.println("Start capturing...");
- 
+
             AudioInputStream ais = new AudioInputStream(line);
             AudioSystem.write(ais, TYPE, wavFile);
-            
-        } catch (Exception ex) { ex.printStackTrace(); } 
+
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
- 
+
     private void startRecording() {
 		if (wavFile == null)
 			wavFile = AUDIO_QUERY;
@@ -95,13 +97,12 @@ public class Microphone implements Runnable {
         line.stop();
         line.close();
         line = null;
-        
+
 		try {
 			final FileUrlResource url = new FileUrlResource(wavFile.getAbsolutePath());
     		new Thread(() -> listener.transcribed(transcriber.call(url))).start();
 		} catch (Throwable t) { listener.micDrop(t); }
-        
+
     }
- 
 
 }

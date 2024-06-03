@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>net.judah</groupId>
 	<artifactId>zit</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>zit</name>
 	<description>Zenith Intelligence Tracker</description>
 	<properties>
@@ -26,11 +26,13 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-openai-spring-boot-starter</artifactId>
 		</dependency>
-		<dependency>
+<!-- -->		
+	<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!-- -->		
 	</dependencies>
 
 	<dependencyManagement>

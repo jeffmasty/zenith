@@ -3,26 +3,19 @@ package net.judah.zenith.model;
 import static net.judah.zenith.swing.Common.date;
 import static net.judah.zenith.swing.Common.time;
 
-import java.io.File;
-import java.net.URISyntaxException;
-
 import org.springframework.ai.chat.model.ChatResponse;
 
 import net.judah.zenith.embed.EmbedRequest;
 import reactor.core.publisher.Flux;
 
-public record Interaction(EmbedRequest request, Flux<ChatResponse> flux) implements Contact {
-
-	public File location(File parent) throws URISyntaxException {
-		return new File(parent, request.start() + "." + TYPE.getExtension());
-	}
+public record Embedding(EmbedRequest request, Flux<ChatResponse> flux) implements Contact {
 
 	@Override public String query() {
 		return request.query();
 	}
 
 	@Override public String model() {
-		return request.model();
+		return "small";
 	}
 
 	@Override
@@ -38,5 +31,6 @@ public record Interaction(EmbedRequest request, Flux<ChatResponse> flux) impleme
 	public long start() {
 		return request.start();
 	}
+
 }
-	
+

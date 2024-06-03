@@ -7,11 +7,13 @@ import java.util.ArrayList;
 
 import javax.swing.JTextField;
 
+import net.judah.zenith.wav.WavPlayer;
+
 public class HistoryText extends JTextField {
 
 	private ArrayList<String> history = new ArrayList<>();
     private int caret;
-	
+
 	public HistoryText(Dimension size) {
     	Common.resize(this, size);
     	addKeyListener(new KeyAdapter() {
@@ -25,7 +27,10 @@ public class HistoryText extends JTextField {
                      e.consume();
                  }
                  else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                	 setText("");
+                	 if (WavPlayer.isPlaying())
+                		 WavPlayer.stop();
+                	 else
+                		 setText("");
                      e.consume();
                  }
              }
@@ -36,7 +41,7 @@ public class HistoryText extends JTextField {
 	 * @returns getText() */
 	public String acquire() {
 		String input = getText();
-		if (input.isBlank()) 
+		if (input.isBlank())
 			return input;
 		history.add(input);
 		caret = 0;
@@ -51,5 +56,5 @@ public class HistoryText extends JTextField {
     		caret = 0;
     	return history.get(caret);
     }
-	
+
 }
