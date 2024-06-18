@@ -1,5 +1,7 @@
 package net.judah.zenith.embed;
 
+import static net.judah.zenith.swing.Icons.*;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,20 +13,20 @@ import java.util.Hashtable;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import net.judah.zenith.swing.Scroller;
 import net.judah.zenith.wav.MicCheck;
 import net.judah.zenith.wav.Microphone;
 import net.judah.zenith.wav.WavPlayer;
+import reactor.core.publisher.Flux;
 
 // TODO tabs: Documents, SysPrompt, UserQuery, Filter, MetaData, Chunkie
 @Component
@@ -57,21 +60,16 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 	        "Do not use other information.\r\n" +
 	        "Respond 'Incognitum!', if you do not know.\r\n";
 
-	private static final String MIC = "Record ⏺";
+	private static final String RECORD_LBL = "Record ⏺";
 
 	@Autowired private TextToVoice text2Speech;
 	@Autowired private Microphone mic;
-	@Autowired private WavPlayer player;
-	@Autowired private ImageIcon micIcon;
-	@Autowired private ImageIcon recordIcon;
-	@Autowired private ImageIcon sendIcon;
-	@Autowired private ImageIcon speakersIcon;
-	@Autowired private ImageIcon send16;
 
+	private final WavPlayer player = WavPlayer.getInstance();
 	private final VectorDB database;
     private Embedding current;
     private final SearchRequest sr = SearchRequest.defaults();
-	private final TextScroll scroll;
+	private final TextScroll scroll = new TextScroll();
   	private final HistoryArea userPrompt = new HistoryArea();
   	private final HistoryArea sysPrompt = new HistoryArea(SYS_INIT);
 	private final JTable documents;
@@ -86,7 +84,6 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 	public EmbedView(VectorDB rag) {
 		this.database = rag;
 		documents = new JTable(database);
-		scroll = new TextScroll(()->endStream());
 		userPrompt.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (!e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -134,19 +131,19 @@ public class EmbedView extends JPanel implements MicCheck, Common {
         gbc.gridy = TABLE_HEIGHT + 1;
         JComponent lbl = Box.createVerticalBox();
         lbl.add(new JLabel("<html><center>System<br/>Prompt</center></html"));
-        lbl.add(new Btn(MIC, e->mic(sysPrompt)));
+        lbl.add(new Btn(RECORD_LBL, e->mic(sysPrompt)));
         top.add(lbl, gbc);
 
         gbc.gridy = TABLE_HEIGHT + 3;
         lbl = Box.createVerticalBox();
         lbl.add(new JLabel("<html><center>User<br/>Query</center></html"));
-        lbl.add(new Btn(MIC, e->mic(userPrompt)));
+        lbl.add(new Btn(RECORD_LBL, e->mic(userPrompt)));
         top.add(lbl, gbc);
         gbc.gridheight = 1;
 
         JComponent btns = Box.createVerticalBox();
-        JButton add = new Btn(UIManager.getIcon("FileView.fileIcon"), e->addFiles());
-        JButton run = new Btn(send16, e->exec());
+        JButton add = new Btn(NEW_FILE, e->addFiles());
+        JButton run = new Btn(SEND16, e->exec());
         add.setText(" Add ");
         run.setText(" Run ");
         run.setHorizontalTextPosition(JButton.LEFT);
@@ -184,8 +181,8 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 	}
 
 	private JComponent footer() {
-		micBtn = new Btn(micIcon, e->mic(userPrompt));
-		audio = new Btn(speakersIcon, e->toggleAudio());
+		micBtn = new Btn(MIC, e->mic(userPrompt));
+		audio = new Btn(SPEAKERS, e->toggleAudio());
         Hashtable<Integer, JLabel> results = new Hashtable<>();
         results.put(0, new JLabel("1"));
         results.put(10, new JLabel("10"));
@@ -214,7 +211,7 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 
         result.add(audio);
 		result.add(micBtn);
-        result.add(new Btn(sendIcon, e->exec()));
+        result.add(new Btn(SEND, e->exec()));
 
         result.add(Box.createHorizontalStrut(STRUT));
         return result;
@@ -284,7 +281,7 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 
 	private void loadSession() {
 		FileChooser.setCurrentDir(Props.getFolder(Folder.VECTORS));
-		File selected = FileChooser.choose(JFileChooser.FILES_ONLY, Props.DOTRAG, "Vector Databases");
+		File selected = FileChooser.choose(JFileChooser.FILES_AND_DIRECTORIES, Props.DOTRAG, "Vector Databases");
 		if (selected == null)
 			return;
 		if (database.loadSession(selected))
@@ -293,10 +290,15 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 
 	private void saveSession() {
 		String sesh = sessionName.getText();
-		if (sesh.isBlank()) {
+		if (sesh.isBlank())
+			sesh = JOptionPane.showInputDialog(null, "Session Name:", "Save Session", JOptionPane.PLAIN_MESSAGE);
+
+		if (sesh == null || sesh.isBlank()) {
 			sessionName.setText("No Session Name");
 			return;
 		}
+		else
+			sessionName.setText(sesh);
 		try {
 			database.saveSession(sesh);
 		} catch (Exception e) {
@@ -314,7 +316,10 @@ public class EmbedView extends JPanel implements MicCheck, Common {
     	sr.withTopK(topK.getValue() + 1);
     	sr.withQuery(question);
 
-    	current = database.query(new EmbedRequest(sysPrompt.getText(), question, sr));
+    	EmbedRequest request = new EmbedRequest(sysPrompt.getText(), question, sr);
+    	Flux<ChatResponse> flux = database.query(request);
+    	flux.subscribe(chunk->{},err->endStream(),()->endStream());
+    	current = new Embedding(request, flux);
     	scroll.show(current);
 	}
 
@@ -348,7 +353,7 @@ public class EmbedView extends JPanel implements MicCheck, Common {
 			target.setText("Recording started...");
 		else
 			target.setText("Processing audio...");
-		micBtn.setIcon(recording ? recordIcon : micIcon);
+		micBtn.setIcon(recording ? RECORD : MIC);
 	}
 
 	@Override

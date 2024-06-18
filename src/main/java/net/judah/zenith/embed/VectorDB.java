@@ -13,6 +13,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -37,10 +38,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import net.judah.zenith.model.Embedding;
 import net.judah.zenith.settings.AutoSave;
 import net.judah.zenith.settings.Props;
 import net.judah.zenith.swing.Common;
+import reactor.core.publisher.Flux;
 
 /** Retrieval, Augmentation, Generation, JSON de/serializer and JTable model */
 @Component
@@ -67,7 +68,7 @@ public class VectorDB extends DefaultTableModel {
 
     @PostConstruct
     public void init() {
-    	createVectorStore("newsesh", DEFAULT_MODEL, DEFAULT_DIMENSIONS);
+    	createVectorStore("", DEFAULT_MODEL, DEFAULT_DIMENSIONS);
     }
 
 	public OpenAiEmbeddingOptions createVectorStore(String name, EmbedType model, int dimensions) {
@@ -82,7 +83,7 @@ public class VectorDB extends DefaultTableModel {
 	}
 
     //@GetMapping("/rag") public ChatResponse query(@RequestParam String question) @return ResponseEntity<String>.ok()
-	public Embedding query(EmbedRequest request) {
+	public Flux<ChatResponse> query(EmbedRequest request) {
         List<Document> similarData = vectors.similaritySearch(request.searchRequest());
         String data = similarData.stream()
                 .map(Document::getContent)
@@ -98,7 +99,7 @@ public class VectorDB extends DefaultTableModel {
         messages.add(userMessage);
         var prompt = new Prompt(messages);
         history.add(new UserMessage(request.query()));
-        return new Embedding(request, chatModel.stream(prompt));
+        return chatModel.stream(prompt);
 	}
 
 	public void saveSession() throws StreamWriteException, DatabindException, IOException {

@@ -9,8 +9,9 @@ import org.springframework.ai.image.ImageOptions;
 
 import net.judah.zenith.settings.Folder;
 import net.judah.zenith.settings.Props;
+import reactor.core.publisher.Flux;
 
-public record Snapshot(String query, ImageOptions settings, long start) {
+public record Snapshot(String query, ImageOptions settings, long start) implements Contact {
 
 	public Snapshot(String query, ImageOptions settings, String imageUrl) {
 		this(query, settings, System.currentTimeMillis());
@@ -18,6 +19,7 @@ public record Snapshot(String query, ImageOptions settings, long start) {
 
 	public static final String EXT = ".png";
 
+	@Override
 	public String info() {
 		String NL = System.lineSeparator();
 		StringBuilder sb = new StringBuilder();
@@ -40,4 +42,13 @@ public record Snapshot(String query, ImageOptions settings, long start) {
 		return getLocation(Long.toString(start));
 	}
 
+	@Override
+	public Flux<?> flux() {
+		return Flux.empty();
+	}
+
+	@Override
+	public String model() {
+		return settings.getModel();
+	}
 }

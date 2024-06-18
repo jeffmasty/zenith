@@ -1,12 +1,15 @@
 package net.judah.zenith.image;
 
-import java.awt.Dimension;
+import static net.judah.zenith.swing.Icons.MIC;
+import static net.judah.zenith.swing.Icons.RECORD;
+import static net.judah.zenith.swing.Icons.SEND;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -46,14 +49,10 @@ public class ImageView extends JPanel implements MicCheck {
 
 	@Autowired private OpenAiImageModel client;
 	@Autowired private Microphone mic;
-	@Autowired private ImageIcon micIcon;
-	@Autowired private ImageIcon recordIcon;
-	@Autowired private ImageIcon sendIcon;
-	@Autowired private ImageIcon send16;
 
     private Snapshot current;
-    private final HistoryText input = new HistoryText(new Dimension(520, 25));
-	private final ImageScroll scroll;
+    private final HistoryText input = new HistoryText();
+	private final ImageScroll scroll = new ImageScroll();
     private final ArrayList<ImageMessage> history = new ArrayList<>();
     private final JComboBox<String> model = new JComboBox<>(MODELS);
     private final JComboBox<String> size = new JComboBox<>(SIZES[0]);
@@ -63,10 +62,17 @@ public class ImageView extends JPanel implements MicCheck {
     // private final JComboBox<String> style = new JComboBox<>(new String[] {"natural", "vivid"});
 
 	public ImageView() {
-		scroll = new ImageScroll(()->clear());
         searchBtn = new Btn("", e -> exec());
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(Common.wrap(new JLabel(PROMPT), input, searchBtn));
+
+		JComponent query = Box.createHorizontalBox();
+		query.add(Box.createHorizontalStrut(3));
+		query.add(new JLabel(PROMPT));
+		query.add(input);
+		query.add(searchBtn);
+		query.add(Box.createHorizontalStrut(3));
+		query.setMaximumSize(Common.ONE_LINER);
+		add(query);
 		add(new Scroller(scroll));
 		add(Box.createVerticalGlue());
 	    input.addActionListener(e->exec());
@@ -74,12 +80,12 @@ public class ImageView extends JPanel implements MicCheck {
 	@PostConstruct
 	public void init() {
 		footer();
-		searchBtn.setIcon(send16);
+		searchBtn.setIcon(SEND);
 	}
 
     private void footer() {
 
-		micBtn = new Btn(micIcon, e->mic());
+		micBtn = new Btn(MIC, e->mic());
 		footer.add(Box.createHorizontalGlue());
 		footer.add(new JLabel(" Model: "));
 		footer.add(model);
@@ -87,7 +93,7 @@ public class ImageView extends JPanel implements MicCheck {
 		// footer.add(style); // spring.io may not currently support
 		footer.add(Box.createHorizontalGlue());
 		footer.add(micBtn);
-		footer.add(new Btn(sendIcon, e->exec()));
+		footer.add(new Btn(SEND, e->exec()));
 
 		model.addActionListener(l->{
 			size.removeAllItems();
@@ -112,7 +118,7 @@ public class ImageView extends JPanel implements MicCheck {
 			input.setText("Recording started...");
 		else
 			input.setText("Processing audio...");
-		micBtn.setIcon(recording ? recordIcon : micIcon);
+		micBtn.setIcon(recording ? RECORD: MIC);
 	}
 
 	public void exec() {
@@ -133,7 +139,6 @@ public class ImageView extends JPanel implements MicCheck {
 	        .withModel("" + model.getSelectedItem())
 	        .withWidth(width)
 	        .withHeight(height)
-
 	        .build();
 
 		history.add(new ImageMessage(query));
@@ -141,7 +146,7 @@ public class ImageView extends JPanel implements MicCheck {
         List<ImageMessage> messages = size <= SEND_HISTORY ?
         		new ArrayList<>(history) :
         		new ArrayList<>(history.subList(size - SEND_HISTORY, size));
-
+        Collections.reverse(messages);
 	    current = new Snapshot(query, options, System.currentTimeMillis());
 	    ImageWidget widget = scroll.show(current);
 	    new Thread(()->{
@@ -152,6 +157,7 @@ public class ImageView extends JPanel implements MicCheck {
 		    	widget.downloadAndSave(imageUrl, current.getLocation());
 		    else
 		    	widget.downloadImage(imageUrl);
+		    clear();
 	    }).start();
 	}
 

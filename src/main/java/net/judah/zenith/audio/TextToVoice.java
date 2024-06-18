@@ -18,8 +18,8 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import net.judah.zenith.settings.Audio;
-import net.judah.zenith.settings.Props;
 import net.judah.zenith.settings.Folder;
+import net.judah.zenith.settings.Props;
 
 @Component
 public class TextToVoice {

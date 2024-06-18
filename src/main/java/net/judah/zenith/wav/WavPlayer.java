@@ -11,27 +11,24 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+import lombok.Getter;
 import net.judah.zenith.settings.Audio;
 import net.judah.zenith.settings.Props;
+import net.judah.zenith.swing.Icons;
 
 public class WavPlayer implements Runnable {
 
-	private static WavPlayer instance;
-
-	private final ImageIcon speakersOn;
-	private ImageIcon speakersOld;
+	@Getter private static WavPlayer instance = new WavPlayer();
 
 	private SourceDataLine line;
 	private AudioInputStream in;
 	private AudioFormat format;
 	private JButton speakers;
 
-	public WavPlayer(ImageIcon speakersOn) {
+	private WavPlayer() {
 		instance = this;
-		this.speakersOn = speakersOn;
 	}
 
 	/**  On Ubunu, modified /usr/lib/jvm/[version]/conf/sound.properties, added
@@ -55,8 +52,7 @@ public class WavPlayer implements Runnable {
 			return;
 		try {
 			line.open(format);
-			speakersOld = (ImageIcon)speakers.getIcon();
-			speakers.setIcon(speakersOn);
+			speakers.setIcon(Icons.PLAYING);
 
 			line.start();
             setVolume(Integer.parseInt(Props.get(Audio.Volume.key, "80"))); // (0.0 is max volume, -80.0 is min volume)
@@ -100,7 +96,7 @@ public class WavPlayer implements Runnable {
         line.drain();
         line.stop();
         line.close();
-        speakers.setIcon(speakersOld);
+        speakers.setIcon(Icons.SPEAKERS);
 	}
 
 	public static void stop() {
@@ -117,7 +113,8 @@ public class WavPlayer implements Runnable {
     public static AudioFormat getOutFormat(AudioFormat inFormat) {
         final int ch = inFormat.getChannels();
         final float rate = inFormat.getSampleRate();
-        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, rate, 16, ch, ch * 2, rate, false);
+
+        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, rate, 16, ch, 2, rate, false);
     }
 
     /** print information about system mixers */

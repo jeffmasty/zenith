@@ -3,30 +3,23 @@ package net.judah.zenith.model;
 import static net.judah.zenith.swing.Common.date;
 import static net.judah.zenith.swing.Common.time;
 
-import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionChunk;
-import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest;
+import org.springframework.ai.openai.OpenAiChatOptions;
 
 import reactor.core.publisher.Flux;
 
+public record Chat(String query, OpenAiChatOptions options, Flux<?> flux, long start) implements Contact {
 
-public record Encounter(ChatCompletionRequest request, Flux<ChatCompletionChunk> flux, long start) implements Contact {
-
-	public Encounter(ChatCompletionRequest request, Flux<ChatCompletionChunk> flux) {
-		this(request, flux, System.currentTimeMillis());
-	}
-
-	@Override
-	public String query() {
-		return request.messages().get(0).content();
-	}
-
-	public float temperature() {
-		return request.temperature();
+	public Chat(String query, OpenAiChatOptions options, Flux<?> flux) {
+		this(query, options, flux, System.currentTimeMillis());
 	}
 
 	@Override
 	public String model() {
-		return request.model();
+		return options.getModel();
+	}
+
+	public float temperature() {
+		return options.getTemperature();
 	}
 
 	@Override
@@ -40,5 +33,6 @@ public record Encounter(ChatCompletionRequest request, Flux<ChatCompletionChunk>
 		// sb.append("tokens: ").append("TODO").append(NL);
 		return sb.toString();
 	}
+
 
 }

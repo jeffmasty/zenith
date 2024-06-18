@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
+		<version>3.2.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>net.judah</groupId>
 	<artifactId>zit</artifactId>
-	<version>0.1</version>
+	<version>0.3</version>
 	<name>zit</name>
 	<description>Zenith Intelligence Tracker</description>
 	<properties>
@@ -40,9 +40,9 @@
 			<dependency>
 				<groupId>org.springframework.ai</groupId>
 				<artifactId>spring-ai-bom</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
+				<version>1.0.0-M1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -54,6 +54,11 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<resources>
+        <resource>
+			<directory>src/main/resources</directory>
+        </resource>
+    </resources>
 	</build>
 	<repositories>
 	 <repository>

@@ -13,9 +13,10 @@ public class HistoryText extends JTextField {
 
 	private ArrayList<String> history = new ArrayList<>();
     private int caret;
+	static final Dimension size = new Dimension(Common.WIDE - 100, 30);
 
-	public HistoryText(Dimension size) {
-    	Common.resize(this, size);
+	public HistoryText() {
+		setPreferredSize(size);
     	addKeyListener(new KeyAdapter() {
     		@Override public void keyPressed(KeyEvent e) {
                  if (e.getKeyCode() == KeyEvent.VK_UP) {
@@ -45,6 +46,7 @@ public class HistoryText extends JTextField {
 			return input;
 		history.add(input);
 		caret = 0;
+		setText("");
 		return input;
 	}
 

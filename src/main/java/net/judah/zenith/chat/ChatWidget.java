@@ -21,19 +21,21 @@ import net.judah.zenith.swing.Widget;
 public class ChatWidget extends Widget {
 
 	@Getter private final Contact chat;
-	private final AiText answer = new AiText();
+	private final AiText answer;
 	private long end;
 
 	@SuppressWarnings("unchecked")
-	public ChatWidget(Contact transaction, TextScroll parent, Runnable onEndStream) {
-		super(parent, transaction.query(), onEndStream);
+	public ChatWidget(Contact transaction, TextScroll parent) {
+		super(parent, transaction.query());
 		this.chat = transaction;
+		answer = new AiText(parent);
 		add(answer, BorderLayout.CENTER);
 
 		chat.flux().subscribe(
 			chunk -> processChunk(chunk),
-            error -> { onEndStream.run(); System.err.println(error); },
+            error -> { System.err.println(error); },
             ()-> endStream());
+
 
 	}
 
@@ -52,7 +54,6 @@ public class ChatWidget extends Widget {
 
 	private void endStream() {
 		end = System.currentTimeMillis();
-		onEndStream.run();
 		System.out.println();
 	}
 
@@ -87,7 +88,8 @@ public class ChatWidget extends Widget {
 
 	@Override
 	public void copy() {
-		answer.selectAll();
+		if (answer.getSelectedText() == null || answer.getSelectedText().isBlank())
+			answer.selectAll();
 		answer.copy();
 	}
 

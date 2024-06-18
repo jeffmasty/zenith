@@ -15,7 +15,7 @@ public class Scroller extends JScrollPane{
 		super(view);
 		setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		setPreferredSize(MAX);
-		setMaximumSize(MAX);
+//		setMaximumSize(MAX);
 		view.setMinimumSize(new Dimension(Common.WIDE - 25, YRANGE));
 		getVerticalScrollBar().setUnitIncrement(60);
 	}

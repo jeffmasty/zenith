@@ -4,16 +4,16 @@ import javax.swing.JPanel;
 
 import net.judah.zenith.model.Contact;
 import net.judah.zenith.swing.Scroll;
+import net.judah.zenith.swing.Widget;
 
 public class TextScroll extends Scroll {
 
-	public TextScroll(Runnable onComplete) {
-		super(onComplete);
-	}
-
-	public void show(Contact transaction) {
-		chats.add(new ChatWidget(transaction, this, onEndStream));
+	@Override
+	public Widget show(Contact transaction) {
+		ChatWidget result = new ChatWidget(transaction, this);
+		chats.add(result);
 		populate();
+		return result;
 	}
 
 	public ChatWidget getChatWidget(Contact e) {

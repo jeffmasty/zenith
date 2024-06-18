@@ -6,9 +6,9 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 public class FileChooser {
-	
+
 	static File currentDir = new File(System.getProperty("user.dir"));
-	
+
 	public static void setCurrentDir(File folder) {
 		currentDir = folder;
 	}
@@ -25,9 +25,9 @@ public class FileChooser {
 				@Override public String getDescription() {
 					return description; }
 				@Override public boolean accept(File f) {
-					return f.isDirectory() || f.getName().endsWith(extension); } 
+					return f.isDirectory() || f.getName().endsWith(extension); }
 			});
-		
+
 		fc.setCurrentDirectory(new File(System.getProperty("user.home")));
 		if (currentDir != null && currentDir.isDirectory())
 			fc.setCurrentDirectory(currentDir);
@@ -37,24 +37,24 @@ public class FileChooser {
 		if (result == JFileChooser.APPROVE_OPTION) {
 		    File selectedFile = fc.getSelectedFile();
 		    currentDir = fc.getCurrentDirectory();
-		    return selectedFile == null ? null : 
+		    return selectedFile == null ? null :
 		    	new File(selectedFile.getAbsolutePath()); // JSON doesn't like File subclass
 		}
 		return null;
 	}
-	
+
 	public static File[] multi(File dir, String extension, String description) {
 		JFileChooser fc = new JFileChooser();
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (extension != null)
 			fc.setFileFilter(new FileFilter() {
 				@Override public String getDescription() {
 					return description; }
 				@Override public boolean accept(File f) {
-					return f.getName().endsWith(extension); } 
+					return f.isDirectory() || f.getName().endsWith(extension); }
 			});
 		fc.setCurrentDirectory(dir);
 		fc.setMultiSelectionEnabled(true);
+		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		int result = fc.showOpenDialog(null);
 		if (result == JFileChooser.APPROVE_OPTION) {
 		    // currentDir = fc.getCurrentDirectory();
@@ -62,7 +62,7 @@ public class FileChooser {
 		}
 		return null;
 	}
-	
+
 	public static File choose() {
 		return choose(0, null, null);
 	}

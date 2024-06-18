@@ -22,10 +22,14 @@ import javax.swing.border.EmptyBorder;
 
 public interface Common {
 
-	int WIDE = 666;
-	int PAGE = 777;
+    record Dual(File json, File db) { }
+
+    int WIDE = 650;
+	int PAGE = 710;
 	int LINE = 24;
 	int STRUT = 9;
+
+    String AUTOMAGIC = " will automatically be saved";
 
 	DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(TimeZone.getDefault().toZoneId());
 	DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MMM-yy").withZone(TimeZone.getDefault().toZoneId());
@@ -34,11 +38,11 @@ public interface Common {
 	Font SMALL = new Font("Arial", Font.PLAIN, 10);
 	Dimension BOLD_SZ = new Dimension((int) ((WIDE / 3f)*2), LINE * 2);
 	Dimension SETTING_SLIDER = new Dimension(160, LINE * 2);
+	Dimension ONE_LINER = new Dimension(2000, 32);
     CompoundBorder COMPOUND_BORDER = BorderFactory.createCompoundBorder(
     		BorderFactory.createLineBorder(Color.GRAY),
     		new EmptyBorder(3, 9, 3, 9));
 
-	String SEND = " Send ";
 
 	static JComponent resize(JComponent c, Dimension d) {
 		c.setMaximumSize(d);
@@ -112,9 +116,5 @@ public interface Common {
 
 		}
 	}
-
-    record Dual(File json, File db) { }
-
-    String AUTOMAGIC = " will automatically be saved";
 
 }

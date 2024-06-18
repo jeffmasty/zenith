@@ -17,24 +17,22 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
+import lombok.Getter;
 import net.judah.zenith.model.Snapshot;
-import net.judah.zenith.settings.Props;
 import net.judah.zenith.swing.Scroll;
 import net.judah.zenith.swing.Widget;
 
 public class ImageWidget extends Widget {
 
-	@Autowired Props settings;
-	private final Snapshot input;
-	private final ImageLabel icon = new ImageLabel();
+	@Getter private final Snapshot input;
+	private final ImageLabel icon;
 	private BufferedImage image;
 	private long end;
 
-	public ImageWidget(Snapshot snapshot, Scroll parent, Runnable onEndStream) {
-		super(parent, snapshot.query(), onEndStream);
+	public ImageWidget(Snapshot snapshot, Scroll parent) {
+		super(parent, snapshot.query());
 		this.input = snapshot;
+		icon = new ImageLabel(parent);
 		add(icon, BorderLayout.CENTER);
 	}
 
@@ -44,7 +42,6 @@ public class ImageWidget extends Widget {
 			image = ImageIO.read(url);
 			icon.setIcon(new ImageIcon(image));
 			repaint();
-			onEndStream.run();
 			ImageIO.write(image, "png", save);
 		} catch (Throwable t) {t.printStackTrace();}
 	}
@@ -55,7 +52,6 @@ public class ImageWidget extends Widget {
 			image = ImageIO.read(url);
 			icon.setIcon(new ImageIcon(image));
 			repaint();
-			onEndStream.run();
 		} catch (Throwable t) {t.printStackTrace();}
 	}
 
@@ -88,7 +84,7 @@ public class ImageWidget extends Widget {
 	}
 
 	@Override
-	public void copy() {
+	protected void copy() {
         TransferableImage transferableImage = new TransferableImage(image);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(transferableImage, null);

@@ -4,18 +4,24 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import net.judah.zenith.swing.Common;
+import net.judah.zenith.swing.Scroll;
 
 public class ImageLabel extends JLabel {
 
-	private static final int WIDE = Common.WIDE - 20;
+	private static final int MY_SIZE = Common.WIDE - 20;
 
-	public ImageLabel() {
-		Common.resize(this, new Dimension(WIDE, WIDE));
+	public ImageLabel(Scroll mouser) {
+		Common.resize(this, new Dimension(MY_SIZE, MY_SIZE));
+		addMouseListener(new MouseAdapter() {
+			@Override public void mousePressed(MouseEvent e) {
+				mouser.mouseClick(e); }});
 	}
 
 	@Override
@@ -32,8 +38,8 @@ public class ImageLabel extends JLabel {
 
         double imgAspect = (double) imgHeight / imgWidth;
 
-        int canvasWidth = WIDE;// canvas.getWidth();
-        int canvasHeight = WIDE;// canvas.getHeight();
+        int canvasWidth = MY_SIZE;// canvas.getWidth();
+        int canvasHeight = MY_SIZE;// canvas.getHeight();
 
         double canvasAspect = (double) canvasHeight / canvasWidth;
 

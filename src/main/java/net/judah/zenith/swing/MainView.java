@@ -1,5 +1,8 @@
 package net.judah.zenith.swing;
 
+import java.awt.Dimension;
+import java.awt.EventQueue;
+
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
@@ -17,7 +20,6 @@ import net.judah.zenith.settings.Props;
 public class MainView extends JFrame {
 	public static final String TITLE = "Zenith Intelligence Tracker";
 
-
 	@Autowired private ChatView text;
 	@Autowired private EmbedView rag;
 	@Autowired private ImageView dali;
@@ -28,7 +30,7 @@ public class MainView extends JFrame {
 	public MainView() {
         setTitle(TITLE);
 		setSize(Common.WIDE, Common.PAGE);
-		setResizable(false);
+		setMinimumSize(new Dimension(400, 400));
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setContentPane(tabs);
 	}
@@ -42,6 +44,7 @@ public class MainView extends JFrame {
 		tabs.setSelectedIndex(0);
 		doLayout();
 		setVisible(true);
+		EventQueue.invokeLater(()->text.getInput().requestFocusInWindow());
 	}
 
 

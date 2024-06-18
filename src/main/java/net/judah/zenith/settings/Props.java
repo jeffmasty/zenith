@@ -10,11 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,7 +26,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.Voice;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -43,36 +37,30 @@ import net.judah.zenith.wav.WavPlayer;
 @Component
 public class Props extends JPanel implements Common {
 
-	@Autowired
-	WavPlayer player;
+	WavPlayer player = WavPlayer.getInstance();
 
 	/** number of recent chats to send to LLM */
 	public static final int HISTORY_SEND = 15;
-	public static final String PROPERTIES_FILE = "zenith.properties";
 	public static final String DOTJSON = ".json";
 	public static final String DOTRAG = ".rag";
+	public static final String DOTPNG = ".png";
 	public static final File DEFAULT_FOLDER =
 			new File(System.getProperty("user.dir") + System.getProperty("file.separator") + "data");
 
-	private static final File propertiesFile = new File(System.getProperty("user.dir"), PROPERTIES_FILE);
-	private static Properties properties = new Properties();
+	private static StaticProperties properties = StaticProperties.getInstance();
+
 	private final Dimension SZ = new Dimension(210, 27);
 	private final JButton saveBtn;
 	private final JComponent footer = Box.createHorizontalBox();
 	private final ActionListener autoSaver = e->{
 		if (autoSave(AutoSave.Settings))
-			save();
+			properties.save();
 	};
 
 	/** Load the properties file, setup gui */
 	public Props() {
-        try (InputStream input = new FileInputStream(propertiesFile)) {
-            properties.load(input);
-			input.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        saveBtn = new Btn("Save", e->save());
+
+        saveBtn = new Btn(" Save ", e->properties.save());
         JComponent inner = Box.createVerticalBox();
         inner.add(new Titled("Folders", foldersPnl()));
         inner.add(new Titled("Audio", audioPnl()));
@@ -144,9 +132,9 @@ public class Props extends JPanel implements Common {
     	final GridBagConstraints gbc = audio.getConstraints();
     	gbc.gridy = 0;
     	gbc.gridx = 0;
-    	audio.add(new Check(Audio.AutoPlay), gbc);
-    	gbc.gridx = ++gbc.gridx;
     	audio.add(new Check(Audio.AutoQuery), gbc);
+    	gbc.gridx = ++gbc.gridx;
+    	audio.add(new Check(Audio.AutoPlay), gbc);
     	gbc.gridx = ++gbc.gridx;
     	audio.add(new Check(Audio.HiDef), gbc);
     	gbc.gridx = ++gbc.gridx;
@@ -164,15 +152,6 @@ public class Props extends JPanel implements Common {
         view.install("AutoScroll", new JCheckBox()); //
         view.install("Accordian", new JCheckBox()); //
         return view;
-    }
-
-    private void save() {
-        try (FileOutputStream out = new FileOutputStream(propertiesFile)) {
-            properties.store(out, null);
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void toggleAutoSave(boolean selected) {
@@ -211,6 +190,8 @@ public class Props extends JPanel implements Common {
     	String folder = properties.getProperty(f.key);
     	if (folder == null || folder.isBlank()) {
     		properties.setProperty(f.key, DEFAULT_FOLDER.getAbsolutePath());
+    		if (!DEFAULT_FOLDER.isDirectory())
+    			DEFAULT_FOLDER.mkdir();
     		return DEFAULT_FOLDER;
     	}
     	return new File(folder);
@@ -310,5 +291,4 @@ public class Props extends JPanel implements Common {
     		setHorizontalAlignment(SwingConstants.LEFT);
     	}
     }
-
 }

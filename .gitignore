@@ -1,6 +1,8 @@
+/zenith.properties
 *.log
 *.log.*
 **.class
+
 ##### data/**
 
 HELP.md

@@ -18,6 +18,6 @@ public interface Contact {
 	/** ChatCompletionChunk or ChatResponse */
 	@SuppressWarnings("rawtypes")
 	Flux flux();
-	Object request();
+//	Object request();
 
 }
